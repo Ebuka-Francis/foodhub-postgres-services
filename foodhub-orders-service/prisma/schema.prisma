@@ -1,0 +1,28 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  userId      String      // Logical reference to User from foodhub-auth-service
+  totalAmount Float
+  status      String      @default("PENDING") // PENDING, PROCESSING, COMPLETED, CANCELLED
+  items       OrderItem[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String   // Logical reference to Product from foodhub-catalog-service
+  vendorId  String   // Logical reference to Vendor from foodhub-catalog-service (Crucial for vendor order tracking!)
+  quantity  Int
+  price     Float
+}
